@@ -29,4 +29,11 @@ public class Theme {
     @OneToMany(mappedBy = "themeId")
     private Set<StudentTheme> studentThemes;
 
+    @Override
+    public String toString() {
+        return "Theme{" +
+                "caption='" + caption + '\'' +
+                ", subjectId=" + subjectId +
+                '}';
+    }
 }

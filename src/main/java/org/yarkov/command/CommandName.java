@@ -4,6 +4,11 @@ public enum CommandName {
 
     START("/start"),
     TIMETABLE("/timetable"),
+    SET_THEME("/set_theme"),
+    SHOW_MARKS("/show_marks"),
+    FIND_THEME("/find_theme"),
+    THEMES("/themes"),
+    SHOW_THEMES("/show_themes"),
     HELP("/help");
 
     private final String commandName;

@@ -1,12 +1,10 @@
 package org.yarkov.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Table(name = "`student_theme`")
@@ -33,8 +31,16 @@ public class StudentTheme {
     @Column(name = "`appointment_date`")
     private LocalDate appointmentDate;
 
-    @ManyToOne
-    @JoinColumn(name = "`student_theme_id`", nullable = false)
-    private Timetable timetable;
+    @OneToMany(mappedBy = "studentTheme")
+    private Set<Timetable> timetables;
 
+    @Override
+    public String toString() {
+        return "StudentTheme{" +
+                "studentId=" + studentId +
+                ", themeId=" + themeId +
+                ", mark=" + mark +
+                ", appointmentDate=" + appointmentDate +
+                '}';
+    }
 }

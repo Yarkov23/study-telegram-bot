@@ -1,27 +1,22 @@
 package org.yarkov.command;
 
-import com.google.common.collect.ImmutableMap;
-import org.yarkov.command.name.HelpCommand;
-import org.yarkov.command.name.StartCommand;
-import org.yarkov.command.name.TimetableCommand;
-import org.yarkov.command.name.UnknownCommand;
+import org.springframework.stereotype.Component;
 import org.yarkov.service.SendBotMessageService;
 
-import static org.yarkov.command.CommandName.*;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CommandContainer {
-    private final ImmutableMap<String, Command> commandMap;
+    private final Map<String, Command> commandMap;
     private final Command unknownCommand;
 
+    public CommandContainer(List<Command> commandList, Command unknownCommand) {
 
-    public CommandContainer(SendBotMessageService sendBotMessageService) {
-        commandMap = ImmutableMap.<String, Command>builder()
-                .put(START.getCommandName(), new StartCommand(sendBotMessageService))
-                .put(HELP.getCommandName(), new HelpCommand(sendBotMessageService))
-                .put(TIMETABLE.getCommandName(), new TimetableCommand(sendBotMessageService))
-                .build();
+        commandMap = commandList.stream()
+                .collect(Collectors.toMap(Command::getCommandName, c -> c));
 
-        unknownCommand = new UnknownCommand(sendBotMessageService);
+        this.unknownCommand = unknownCommand;
     }
 
     public Command retrieveCommand(String commandIdentifier) {

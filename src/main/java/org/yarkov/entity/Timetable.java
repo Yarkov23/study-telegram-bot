@@ -1,13 +1,9 @@
 package org.yarkov.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Set;
 
 @Entity
 @Table(name = "`timetable`")
@@ -15,13 +11,11 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class Timetable {
 
     @Id
     private Long id;
-
-    @Column(name = "`caption`")
-    private String caption;
 
     @Column(name = "`date`")
     private LocalDate date;
@@ -32,7 +26,8 @@ public class Timetable {
     @Column(name = "`step_status`")
     private Integer stepStatus;
 
-    @OneToMany(mappedBy = "timetable")
-    private Set<StudentTheme> studentTheme;
+    @ManyToOne
+    @JoinColumn(name = "`student_theme_id`")
+    private StudentTheme studentTheme;
 
 }

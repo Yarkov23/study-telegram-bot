@@ -1,9 +1,11 @@
 package org.yarkov.command.name;
 
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.yarkov.command.Command;
 import org.yarkov.service.SendBotMessageService;
 
+@Component
 public class StartCommand implements Command {
 
     private final SendBotMessageService sendBotMessageService;
@@ -12,6 +14,11 @@ public class StartCommand implements Command {
 
     public StartCommand(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
+    }
+
+    @Override
+    public String getCommandName() {
+        return CommandName.START.getCommandName();
     }
 
     public void execute(Update update) {

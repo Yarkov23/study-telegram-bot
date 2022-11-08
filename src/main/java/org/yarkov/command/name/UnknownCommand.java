@@ -1,10 +1,11 @@
 package org.yarkov.command.name;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.yarkov.command.Command;
 import org.yarkov.service.SendBotMessageService;
 
+@Component
 public class UnknownCommand implements Command {
 
     public static final String UNKNOWN_MESSAGE = "Для того щоб дізнатися перелік команд\n" +
@@ -13,9 +14,13 @@ public class UnknownCommand implements Command {
 
     private final SendBotMessageService sendBotMessageService;
 
-    @Autowired
     public UnknownCommand(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
+    }
+
+    @Override
+    public String getCommandName() {
+        return UNKNOWN_MESSAGE;
     }
 
     public void execute(Update update) {

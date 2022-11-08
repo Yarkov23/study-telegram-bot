@@ -1,7 +1,5 @@
 package org.yarkov;
 
-import org.checkerframework.checker.units.qual.A;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -20,8 +18,8 @@ public class Bot extends TelegramLongPollingBot {
     public static String COMMAND_PREFIX = "/";
     private final CommandContainer commandContainer;
 
-    public Bot() {
-        this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this));
+    public Bot(CommandContainer commandContainer) {
+        this.commandContainer = commandContainer;
     }
 
     public String getBotToken() {

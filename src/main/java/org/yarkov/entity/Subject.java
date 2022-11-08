@@ -25,4 +25,11 @@ public class Subject {
     @OneToMany(mappedBy = "subjectId")
     private Set<Theme> themes;
 
+    @Override
+    public String toString() {
+        return "Subject{" +
+                "id=" + id +
+                ", caption='" + caption + '\'' +
+                '}';
+    }
 }

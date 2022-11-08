@@ -42,4 +42,13 @@ public class Student {
     @OneToMany(mappedBy = "studentId")
     private Set<StudentTheme> studentThemes;
 
+    @Override
+    public String toString() {
+        return "Student{" +
+                "fullName='" + fullName + '\'' +
+                ", group='" + group + '\'' +
+                ", telegramId=" + telegramId +
+                ", course=" + course +
+                '}';
+    }
 }
