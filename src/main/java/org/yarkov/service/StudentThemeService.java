@@ -1,6 +1,7 @@
 package org.yarkov.service;
 
 import org.springframework.stereotype.Service;
+import org.yarkov.entity.Student;
 import org.yarkov.entity.StudentTheme;
 import org.yarkov.repository.StudentThemeRepo;
 
@@ -19,5 +20,8 @@ public class StudentThemeService {
         return studentThemeRepo.findAll();
     }
 
+    public StudentTheme findByStudentId(Student student) {
+        return studentThemeRepo.findByStudentId(student);
+    }
 
 }

@@ -31,6 +31,9 @@ public class Student {
     @Column(name = "`course`")
     private Integer course;
 
+    @Enumerated(EnumType.STRING)
+    private State state;
+
     @ManyToMany
     @JoinTable(
             name = "student_role",

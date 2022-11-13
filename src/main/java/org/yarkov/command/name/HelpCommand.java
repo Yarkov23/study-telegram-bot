@@ -22,9 +22,11 @@ public class HelpCommand implements Command {
                     + "%s - Отримати перелік оцінок\n"
                     + "%s - Отримати перелік студентів і їх тем\n"
                     + "%s - Отримати інформаційне табло\n"
-                    + "%s - Отримати перелік доступних тем\n",
+                    + "%s - Отримати перелік доступних тем\n"
+                    + "%s - Отримати свою оцінку\n"
+                    + "%s - Отримати свою тему\n",
             START.getCommandName(), HELP.getCommandName(), SHOW_MARKS.getCommandName(), SHOW_THEMES.getCommandName(),
-            TIMETABLE.getCommandName(), THEMES.getCommandName());
+            TIMETABLE.getCommandName(), THEMES.getCommandName(), MY_MARK.getCommandName(), MY_THEME.getCommandName());
 
     @Override
     public String getCommandName() {

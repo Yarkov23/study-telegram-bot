@@ -19,15 +19,11 @@ public class SetThemeCommand implements Command {
 
     private final SendBotMessageService sendBotMessageService;
 
-    private StudentThemeService studentService;
-
-    private ThemeService themeService;
 
     private static final String START_SETTING_TEXT =
             "Введіть повне ім'я студента якому треба змінити/назначити тему.";
 
-    private static final String NOT_FOUND_TEXT =
-            "Студента не існує або ім'я студента вказано не вірно.";
+
 
     public SetThemeCommand(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
@@ -46,8 +42,4 @@ public class SetThemeCommand implements Command {
     }
 
 
-    @Autowired
-    public void setThemeService(ThemeService themeService) {
-        this.themeService = themeService;
-    }
 }

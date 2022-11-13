@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.yarkov.entity.Student;
 import org.yarkov.repository.StudentRepo;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.Optional;
 
 @Service
@@ -17,6 +18,10 @@ public class StudentService {
 
     public Optional<Student> findByFullName(String fullName) {
         return Optional.ofNullable(studentRepo.findStudentByFullName(fullName));
+    }
+
+    public Optional<Student> findByTelegramId(Integer telegramId) {
+        return studentRepo.findByTelegramId(telegramId);
     }
 
 }
