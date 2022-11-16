@@ -34,16 +34,18 @@ public class Student {
     @Enumerated(EnumType.STRING)
     private State state;
 
-    @ManyToMany
-    @JoinTable(
-            name = "student_role",
-            joinColumns = @JoinColumn(name = "student_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
+    @ManyToOne
+    @JoinColumn(name = "`role_id`")
+    private Role role;
 
     @OneToMany(mappedBy = "studentId")
     private Set<StudentTheme> studentThemes;
+
+    @Column(name = "`step`")
+    private String step;
+
+    @Column(name = "`state_object`", columnDefinition = "json")
+    private String stateObject;
 
     @Override
     public String toString() {

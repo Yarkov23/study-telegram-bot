@@ -20,6 +20,12 @@ public class StudentService {
         return Optional.ofNullable(studentRepo.findStudentByFullName(fullName));
     }
 
+    public void save(Student student) {
+        if (student == null)
+            return;
+        studentRepo.save(student);
+    }
+
     public Optional<Student> findByTelegramId(Integer telegramId) {
         return studentRepo.findByTelegramId(telegramId);
     }

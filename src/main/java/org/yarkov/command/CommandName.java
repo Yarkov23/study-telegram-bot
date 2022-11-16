@@ -8,7 +8,7 @@ public enum CommandName {
     SHOW_MARKS("/show_marks"),
     FIND_THEME("/find_theme"),
     THEMES("/themes"),
-
+    ADD_THEME("/add_theme"),
     MY_MARK("/my_mark"),
     MY_THEME("/my_theme"),
     SHOW_THEMES("/show_themes"),

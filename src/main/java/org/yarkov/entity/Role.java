@@ -22,7 +22,13 @@ public class Role {
     @Column(name = "`role_name`")
     private String roleName;
 
-    @ManyToMany(mappedBy = "roles")
+    @OneToMany(mappedBy = "role")
     private Set<Student> students;
 
+    @Override
+    public String toString() {
+        return "Role{" +
+                "roleName='" + roleName + '\'' +
+                '}';
+    }
 }

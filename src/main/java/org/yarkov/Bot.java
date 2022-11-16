@@ -7,10 +7,12 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.yarkov.command.CommandContainer;
-import org.yarkov.entity.Student;
+import org.yarkov.entity.*;
 import org.yarkov.service.SendBotMessageService;
-import org.yarkov.service.SendBotMessageServiceImpl;
 import org.yarkov.service.StudentService;
+import org.yarkov.service.StudentThemeService;
+import org.yarkov.service.ThemeService;
+import org.yarkov.state.StateProcessFactory;
 
 import java.util.Optional;
 
@@ -22,15 +24,9 @@ public class Bot extends TelegramLongPollingBot {
     @Value("${telegram.bot.name}")
     private String botName;
 
-    public static String COMMAND_PREFIX = "/";
-    private final CommandContainer commandContainer;
-
+    private StateProcessFactory stateProcessFactory;
     private SendBotMessageService sendBotMessageService;
     private StudentService studentService;
-
-    public Bot(CommandContainer commandContainer) {
-        this.commandContainer = commandContainer;
-    }
 
     public String getBotToken() {
         return botToken;
@@ -44,7 +40,6 @@ public class Bot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
 
             User from = update.getMessage().getFrom();
-
             Optional<Student> student = studentService.findByTelegramId(from.getId().intValue());
 
             if (student.isEmpty()) {
@@ -53,30 +48,8 @@ public class Bot extends TelegramLongPollingBot {
                 return;
             }
 
-
-            switch (student.get().getState()) {
-                case SET_MARK -> {
-
-                }
-                case ADD_THEME -> {
-
-                }
-                case SET_THEME -> {
-
-                }
-                case DEFAULT -> {
-
-                }
-            }
-
-
-            String message = update.getMessage().getText().trim();
-            if (message.startsWith(COMMAND_PREFIX)) {
-                String commandIdentifier = message.split(" ")[0].toLowerCase();
-                commandContainer.retrieveCommand(commandIdentifier).execute(update);
-            }
-
-
+            stateProcessFactory.getStateProcess(student.get().getState())
+                    .process(update, student.get().getStep());
         }
     }
 
@@ -88,5 +61,10 @@ public class Bot extends TelegramLongPollingBot {
     @Autowired
     public void setSendBotMessageService(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
+    }
+
+    @Autowired
+    public void setStateProcessFactory(StateProcessFactory stateProcessFactory) {
+        this.stateProcessFactory = stateProcessFactory;
     }
 }
