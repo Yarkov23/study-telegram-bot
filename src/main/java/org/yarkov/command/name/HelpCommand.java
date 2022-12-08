@@ -41,7 +41,6 @@ public class HelpCommand implements Command {
         return HELP.getCommandName();
     }
 
-
     public void execute(Update update) {
         sendBotMessageService.sendMessage(update.getMessage().getChatId().toString(), HELP_MESSAGE);
     }

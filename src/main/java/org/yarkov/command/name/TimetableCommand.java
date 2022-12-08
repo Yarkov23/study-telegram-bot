@@ -14,9 +14,6 @@ import java.util.List;
 @Component
 public class TimetableCommand implements Command {
 
-
-    private final SendBotMessageService sendBotMessageService;
-
     private TimetableService timetableService;
 
     private final SendBotMessageService sendBotMessageService;

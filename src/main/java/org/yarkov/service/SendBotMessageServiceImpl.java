@@ -14,7 +14,7 @@ public class SendBotMessageServiceImpl implements SendBotMessageService {
     private final Bot bot;
 
     @Autowired
-    public SendBotMessageServiceImpl(Bot bot) {
+    public SendBotMessageServiceImpl(@Lazy Bot bot) {
         this.bot = bot;
     }
 

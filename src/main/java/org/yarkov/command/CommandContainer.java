@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Component
 public class CommandContainer {
     private final Map<String, Command> commandMap;
     private final Command unknownCommand;

@@ -6,4 +6,6 @@ public interface Command {
 
     void execute(Update update);
 
+    String getCommandName();
+
 }

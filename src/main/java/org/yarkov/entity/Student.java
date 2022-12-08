@@ -25,7 +25,7 @@ public class Student {
     @Column(name = "`group`")
     private String group;
 
-    @Column(name = "`telegramId`")
+    @Column(name = "`telegramid`")
     private Integer telegramId;
 
     @Column(name = "`course`")
