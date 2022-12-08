@@ -1,5 +1,8 @@
 package org.yarkov.state;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -8,29 +11,32 @@ import org.yarkov.dto.StudentDTO;
 import org.yarkov.entity.State;
 import org.yarkov.entity.Student;
 import org.yarkov.entity.StudentTheme;
-import org.yarkov.json.StudentJsonConverter;
+import org.yarkov.entity.Theme;
 import org.yarkov.service.SendBotMessageServiceImpl;
 import org.yarkov.service.StudentService;
 import org.yarkov.service.StudentThemeService;
+import org.yarkov.service.ThemeService;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Component
-public class SetMarkState implements StateProcess {
+public class SetThemeState implements StateProcess {
+
+    private SendBotMessageServiceImpl sendBotMessageService;
+
+    private StudentThemeService studentThemeService;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     private StudentService studentService;
-    private StudentThemeService studentThemeService;
-    private final SendBotMessageServiceImpl sendBotMessageService;
-    private StudentJsonConverter studentJsonConverter;
 
-    public SetMarkState(SendBotMessageServiceImpl sendBotMessageService) {
-        this.sendBotMessageService = sendBotMessageService;
-    }
+    private ThemeService themeService;
 
     public State getState() {
-        return State.SET_MARK;
+        return State.SET_THEME;
     }
-
 
     public void process(Update update, String step) {
         User from = update.getMessage().getFrom();
@@ -42,6 +48,7 @@ public class SetMarkState implements StateProcess {
         switch (step) {
             case "Вибрати студента" -> {
                 String text = update.getMessage().getText();
+                StringBuilder stringBuilder = new StringBuilder();
                 Optional<Student> foundedStud = studentService.findByFullName(text);
 
                 if (foundedStud.isPresent()) {
@@ -52,14 +59,20 @@ public class SetMarkState implements StateProcess {
                     studentDTO.setFullName(resultStudent.getFullName());
                     studentDTO.setGroup(resultStudent.getGroup());
 
-                    String converted = studentJsonConverter.convertToDatabaseColumn(studentDTO);
+                    String converted = convertToDatabaseColumn(studentDTO);
 
-                    student.setStep("Поставити оцінку");
+                    student.setStep("Вибрати тему");
                     student.setStateObject(converted);
                     studentService.save(student);
 
+                    List<Theme> themes = themeService.findAll();
+
+                    for (Theme theme : themes) {
+                        stringBuilder.append(theme.getId() + " - " + theme.getCaption() + "\n");
+                    }
+
                     sendBotMessageService.sendMessage(chatId,
-                            "Введіть оцінку по п'ятибальній шкалі (від 1 до 5): ");
+                            "Введіть номер теми із даного списку: " + "\n" + stringBuilder);
 
                 } else {
                     sendBotMessageService.sendMessage(chatId,
@@ -67,22 +80,28 @@ public class SetMarkState implements StateProcess {
                     exit(student);
                 }
             }
-            case "Поставити оцінку" -> {
-                String mark = update.getMessage().getText();
+            case "Вибрати тему" -> {
+                String text = update.getMessage().getText();
 
-                if (isNumeric(mark) && Integer.parseInt(mark) >= 1 && Integer.parseInt(mark) <= 5) {
-                    StudentDTO studentDTO = studentJsonConverter.convertToEntityAttribute(student.getStateObject());
-                    Optional<Student> currentStud = studentService.findByFullName(studentDTO.getFullName());
-                    StudentTheme studentTheme = studentThemeService.findByStudentId(currentStud.get());
-                    studentTheme.setMark(Integer.parseInt(mark));
+                Optional<Theme> foundedTheme = themeService.findById(text);
+
+                if (foundedTheme.isPresent()) {
+                    StudentDTO studentDTO = (StudentDTO) convertToStudentAttribute(student.getStateObject());
+                    Optional<Student> stud = studentService.findByFullName(studentDTO.getFullName());
+                    Student currentStud = stud.get();
+                    StudentTheme studentTheme = studentThemeService.findByStudentId(currentStud);
+                    studentTheme.setThemeId(foundedTheme.get());
                     studentThemeService.save(studentTheme);
                     exit(student);
                 } else {
                     sendBotMessageService.sendMessage(chatId,
-                            "Не вірно введено оцінку.");
+                            "Теми не існує або дані введенно не вірно.");
+                    student.setStep("DEFAULT");
                     exit(student);
                 }
+
             }
+
         }
     }
 
@@ -93,18 +112,26 @@ public class SetMarkState implements StateProcess {
         studentService.save(student);
     }
 
-    public static boolean isNumeric(String str) {
+    public String convertToDatabaseColumn(Object object) {
         try {
-            Integer.parseInt(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
+            return objectMapper.writeValueAsString(object);
+        } catch (JsonProcessingException ex) {
+            return null;
+        }
+    }
+
+    public Object convertToStudentAttribute(String dbData) {
+        try {
+            return objectMapper.readValue(dbData, new TypeReference<StudentDTO>() {
+            });
+        } catch (IOException ex) {
+            return null;
         }
     }
 
     @Autowired
-    public void setStudentJsonConverter(StudentJsonConverter studentJsonConverter) {
-        this.studentJsonConverter = studentJsonConverter;
+    public void setSendBotMessageService(SendBotMessageServiceImpl sendBotMessageService) {
+        this.sendBotMessageService = sendBotMessageService;
     }
 
     @Autowired
@@ -115,5 +142,10 @@ public class SetMarkState implements StateProcess {
     @Autowired
     public void setStudentThemeService(StudentThemeService studentThemeService) {
         this.studentThemeService = studentThemeService;
+    }
+
+    @Autowired
+    public void setThemeService(ThemeService themeService) {
+        this.themeService = themeService;
     }
 }

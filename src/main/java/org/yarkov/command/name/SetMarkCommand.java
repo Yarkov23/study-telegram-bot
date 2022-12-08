@@ -8,27 +8,27 @@ import org.yarkov.command.Command;
 import org.yarkov.command.CommandName;
 import org.yarkov.entity.State;
 import org.yarkov.entity.Student;
-import org.yarkov.service.SendBotMessageService;
+import org.yarkov.service.SendBotMessageServiceImpl;
 import org.yarkov.service.StudentService;
 
 import java.util.Optional;
 
 @Component
-public class AddThemeCommand implements Command {
+public class SetMarkCommand implements Command {
 
-    private final SendBotMessageService sendBotMessageService;
+    private final SendBotMessageServiceImpl sendBotMessageService;
 
     private StudentService studentService;
 
-    public AddThemeCommand(SendBotMessageService sendBotMessageService) {
+    public SetMarkCommand(SendBotMessageServiceImpl sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
     }
 
     public void execute(Update update) {
         String chatId = update.getMessage().getChatId().toString();
         User from = update.getMessage().getFrom();
-        Optional<Student> foundedStudent = studentService.findByTelegramId(from.getId().intValue());
-        Student student = foundedStudent.get();
+        Optional<Student> foundedStud = studentService.findByTelegramId(from.getId().intValue());
+        Student student = foundedStud.get();
 
         if (!student.getRole().getRoleName().equals("Teacher")) {
             sendBotMessageService.sendMessage(chatId,
@@ -36,15 +36,15 @@ public class AddThemeCommand implements Command {
             return;
         }
 
-        student.setState(State.ADD_THEME);
-        student.setStep("Ввести назву теми");
+        student.setState(State.SET_MARK);
+        student.setStep("Вибрати студента");
         studentService.save(student);
-        sendBotMessageService.sendMessage(chatId, "Введіть назву теми яку хочете додати: ");
+        sendBotMessageService.sendMessage(chatId,
+                "Введіть повне ім'я студента якому необхідно поставити оцінку: ");
     }
 
-
     public String getCommandName() {
-        return CommandName.ADD_THEME.getCommandName();
+        return CommandName.SET_MARK.getCommandName();
     }
 
     @Autowired

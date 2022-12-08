@@ -20,6 +20,9 @@ public class StudentThemeService {
         return studentThemeRepo.findAll();
     }
 
+    public void save(StudentTheme studentTheme) {
+        studentThemeRepo.save(studentTheme);
+    }
     public StudentTheme findByStudentId(Student student) {
         return studentThemeRepo.findByStudentId(student);
     }

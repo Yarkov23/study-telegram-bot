@@ -23,10 +23,6 @@ public class SetThemeCommand implements Command {
 
     private StudentService studentService;
 
-    private static final String START_SETTING_TEXT =
-            "Введіть повне ім'я студента якому треба змінити/назначити тему.";
-
-
     public SetThemeCommand(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
     }
@@ -34,12 +30,21 @@ public class SetThemeCommand implements Command {
     @Override
     public void execute(Update update) {
         String chatId = update.getMessage().getChatId().toString();
-        sendBotMessageService.sendMessage(chatId, START_SETTING_TEXT);
         User from = update.getMessage().getFrom();
         Optional<Student> foundedStud = studentService.findByTelegramId(from.getId().intValue());
         Student student = foundedStud.get();
-        student.setState(State.SET_THEME);
 
+        if (!student.getRole().getRoleName().equals("Teacher")) {
+            sendBotMessageService.sendMessage(chatId,
+                    "Ця команда не доступна для вас.");
+            return;
+        }
+
+        student.setState(State.SET_THEME);
+        student.setStep("Вибрати студента");
+        studentService.save(student);
+        sendBotMessageService.sendMessage(chatId,
+                "Введіть повне ім'я студента якому треба назначити тему: ");
     }
 
     @Override

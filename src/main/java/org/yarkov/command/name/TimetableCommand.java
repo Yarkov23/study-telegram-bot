@@ -34,24 +34,27 @@ public class TimetableCommand implements Command {
         String chatId = update.getMessage().getChatId().toString();
         StringBuilder stringBuilder = new StringBuilder();
 
+
         List<Timetable> timetables = timetableService.findAll();
 
 
-        for (Timetable timetable : timetables) {
-            String themeCaption = timetable.getStudentTheme().getThemeId().getCaption();
-            String studentName = timetable.getStudentTheme().getStudentId().getFullName();
-            String date = timetable.getDate().toString();
-            String step = timetable.getStep();
+        if (!timetables.isEmpty()) {
+            for (Timetable timetable : timetables) {
+                String themeCaption = timetable.getStudentTheme().getThemeId().getCaption();
+                String studentName = timetable.getStudentTheme().getStudentId().getFullName();
+                String date = timetable.getDate().toString();
 
-            stringBuilder.append(
-                    "Студент: " + studentName + "\n"
-                            + "Назва теми: " + themeCaption + "\n"
-                            + "Дата здачі робіт: " + date + "\n"
-                            + "Прогрес роботи: " + step + "\n\n"
-            );
+                stringBuilder.append(
+                        "Студент: " + studentName + "\n"
+                                + "Назва теми: " + themeCaption + "\n"
+                                + "Дата здачі робіт: " + date + "\n\n"
+                );
+            }
+            sendBotMessageService.sendMessage(chatId, stringBuilder.toString());
+        } else {
+            sendBotMessageService.sendMessage(chatId, "Дані відсутні.");
         }
 
-        sendBotMessageService.sendMessage(chatId, stringBuilder.toString());
 
     }
 

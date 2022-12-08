@@ -8,29 +8,41 @@ import org.yarkov.dto.StudentDTO;
 import org.yarkov.entity.State;
 import org.yarkov.entity.Student;
 import org.yarkov.entity.StudentTheme;
+import org.yarkov.entity.Timetable;
 import org.yarkov.json.StudentJsonConverter;
 import org.yarkov.service.SendBotMessageServiceImpl;
 import org.yarkov.service.StudentService;
 import org.yarkov.service.StudentThemeService;
+import org.yarkov.service.TimetableService;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.Optional;
 
 @Component
-public class SetMarkState implements StateProcess {
+public class SetSubmissionState implements StateProcess {
+
+    private final SendBotMessageServiceImpl sendBotMessageService;
+
+    private TimetableService timetableService;
 
     private StudentService studentService;
-    private StudentThemeService studentThemeService;
-    private final SendBotMessageServiceImpl sendBotMessageService;
+
     private StudentJsonConverter studentJsonConverter;
 
-    public SetMarkState(SendBotMessageServiceImpl sendBotMessageService) {
+    private StudentThemeService studentThemeService;
+
+    public SetSubmissionState(SendBotMessageServiceImpl sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
     }
 
     public State getState() {
-        return State.SET_MARK;
+        return State.SET_SUBMISSION;
     }
-
 
     public void process(Update update, String step) {
         User from = update.getMessage().getFrom();
@@ -54,12 +66,12 @@ public class SetMarkState implements StateProcess {
 
                     String converted = studentJsonConverter.convertToDatabaseColumn(studentDTO);
 
-                    student.setStep("Поставити оцінку");
+                    student.setStep("Ввести дату");
                     student.setStateObject(converted);
                     studentService.save(student);
 
                     sendBotMessageService.sendMessage(chatId,
-                            "Введіть оцінку по п'ятибальній шкалі (від 1 до 5): ");
+                            "Введіть дату здачі роботи (MM/dd/yyyy): ");
 
                 } else {
                     sendBotMessageService.sendMessage(chatId,
@@ -67,23 +79,40 @@ public class SetMarkState implements StateProcess {
                     exit(student);
                 }
             }
-            case "Поставити оцінку" -> {
-                String mark = update.getMessage().getText();
+            case "Ввести дату" -> {
+                String date = update.getMessage().getText();
 
-                if (isNumeric(mark) && Integer.parseInt(mark) >= 1 && Integer.parseInt(mark) <= 5) {
-                    StudentDTO studentDTO = studentJsonConverter.convertToEntityAttribute(student.getStateObject());
-                    Optional<Student> currentStud = studentService.findByFullName(studentDTO.getFullName());
-                    StudentTheme studentTheme = studentThemeService.findByStudentId(currentStud.get());
-                    studentTheme.setMark(Integer.parseInt(mark));
-                    studentThemeService.save(studentTheme);
-                    exit(student);
-                } else {
+                StudentDTO studentDTO = studentJsonConverter.convertToEntityAttribute(student.getStateObject());
+                Optional<Student> studByFullName = studentService.findByFullName(studentDTO.getFullName());
+                Student currentStud = studByFullName.get();
+                StudentTheme studentTheme = studentThemeService.findByStudentId(currentStud);
+
+                Optional<Timetable> timetableByStudentTheme = timetableService.findByStudentThemeId(studentTheme);
+
+                Timetable timetable = timetableByStudentTheme.get();
+
+                LocalDate localDate = null;
+
+                try {
+                    localDate = dateInput(date);
+                } catch (DateTimeParseException exception) {
                     sendBotMessageService.sendMessage(chatId,
-                            "Не вірно введено оцінку.");
+                            "Некоректний ввід.");
                     exit(student);
                 }
+
+                timetable.setDate(localDate);
+                timetableService.save(timetable);
+                sendBotMessageService.sendMessage(chatId,
+                        "Назначено.");
+                exit(student);
             }
         }
+    }
+
+    public LocalDate dateInput(String input) {
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        return LocalDate.parse(input, dateFormat);
     }
 
     public void exit(Student student) {
@@ -93,18 +122,9 @@ public class SetMarkState implements StateProcess {
         studentService.save(student);
     }
 
-    public static boolean isNumeric(String str) {
-        try {
-            Integer.parseInt(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
     @Autowired
-    public void setStudentJsonConverter(StudentJsonConverter studentJsonConverter) {
-        this.studentJsonConverter = studentJsonConverter;
+    public void setTimetableService(TimetableService timetableService) {
+        this.timetableService = timetableService;
     }
 
     @Autowired
@@ -115,5 +135,10 @@ public class SetMarkState implements StateProcess {
     @Autowired
     public void setStudentThemeService(StudentThemeService studentThemeService) {
         this.studentThemeService = studentThemeService;
+    }
+
+    @Autowired
+    public void setStudentJsonConverter(StudentJsonConverter studentJsonConverter) {
+        this.studentJsonConverter = studentJsonConverter;
     }
 }

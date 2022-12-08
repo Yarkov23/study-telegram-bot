@@ -20,12 +20,6 @@ public class Timetable {
     @Column(name = "`date`")
     private LocalDate date;
 
-    @Column(name = "`step`")
-    private String step;
-
-    @Column(name = "`step_status`")
-    private Integer stepStatus;
-
     @ManyToOne
     @JoinColumn(name = "`student_theme_id`")
     private StudentTheme studentTheme;

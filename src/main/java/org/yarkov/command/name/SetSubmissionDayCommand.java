@@ -14,21 +14,21 @@ import org.yarkov.service.StudentService;
 import java.util.Optional;
 
 @Component
-public class AddThemeCommand implements Command {
+public class SetSubmissionDayCommand implements Command {
 
     private final SendBotMessageService sendBotMessageService;
 
     private StudentService studentService;
 
-    public AddThemeCommand(SendBotMessageService sendBotMessageService) {
+    public SetSubmissionDayCommand(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
     }
 
     public void execute(Update update) {
         String chatId = update.getMessage().getChatId().toString();
         User from = update.getMessage().getFrom();
-        Optional<Student> foundedStudent = studentService.findByTelegramId(from.getId().intValue());
-        Student student = foundedStudent.get();
+        Optional<Student> foundedStud = studentService.findByTelegramId(from.getId().intValue());
+        Student student = foundedStud.get();
 
         if (!student.getRole().getRoleName().equals("Teacher")) {
             sendBotMessageService.sendMessage(chatId,
@@ -36,15 +36,15 @@ public class AddThemeCommand implements Command {
             return;
         }
 
-        student.setState(State.ADD_THEME);
-        student.setStep("Ввести назву теми");
+        student.setState(State.SET_SUBMISSION);
+        student.setStep("Вибрати студента");
         studentService.save(student);
-        sendBotMessageService.sendMessage(chatId, "Введіть назву теми яку хочете додати: ");
+        sendBotMessageService.sendMessage(chatId,
+                "Введіть повне ім'я студента якому треба назначити дату здачі роботи: ");
     }
 
-
     public String getCommandName() {
-        return CommandName.ADD_THEME.getCommandName();
+        return CommandName.SET_SUBMISSION_DAY.getCommandName();
     }
 
     @Autowired

@@ -10,6 +10,9 @@ import org.yarkov.service.SendBotMessageService;
 import org.yarkov.service.StudentThemeService;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Component
 public class ShowThemeCommand implements Command {
@@ -28,14 +31,29 @@ public class ShowThemeCommand implements Command {
         StringBuilder stringBuilder = new StringBuilder();
         List<StudentTheme> studentThemes = studentThemeService.findAll();
 
-        for (StudentTheme studentTheme : studentThemes) {
-            String fullName = studentTheme.getStudentId().getFullName();
-            String caption = studentTheme.getThemeId().getCaption();
-            stringBuilder.append(fullName + " - " + caption + "\n\n");
+        if (!studentThemes.isEmpty()) {
+            Map<String, List<StudentTheme>> classificationByGroup = studentThemes.stream().
+                    collect(Collectors.groupingBy(studentTheme -> studentTheme.getStudentId().getGroup()));
+
+            AtomicInteger counter = new AtomicInteger(1);
+
+            classificationByGroup.forEach((group, studentThemeList) -> {
+                stringBuilder.append("<b>" + group + "</b>" + ":" + "\n");
+
+                for (StudentTheme studentTheme : studentThemes) {
+                    String fullName = studentTheme.getStudentId().getFullName();
+                    String caption = studentTheme.getThemeId().getCaption();
+                    stringBuilder.append(counter.getAndIncrement() + ". " + fullName + " - " + caption + "\n");
+                }
+
+                stringBuilder.append("\n");
+            });
+
+
+            sendBotMessageService.sendMessage(chatId, stringBuilder.toString());
+        } else {
+            sendBotMessageService.sendMessage(chatId, "Дані відсутні.");
         }
-
-        sendBotMessageService.sendMessage(chatId, stringBuilder.toString());
-
     }
 
     @Override

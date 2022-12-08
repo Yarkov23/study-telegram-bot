@@ -27,6 +27,10 @@ public class ThemeService {
         themeRepo.save(theme);
     }
 
+    public Optional<Theme> findById(String strId) {
+        Long id = Long.parseLong(strId);
+        return themeRepo.findById(id);
+    }
 
     public Theme findThemeByCaption(String caption) {
         Optional<Theme> themeByCaption = themeRepo.findThemeByCaption(caption);
